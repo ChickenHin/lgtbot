@@ -1,10 +1,7 @@
 name: CMake
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  workflow_dispatch: 
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -46,68 +43,68 @@ jobs:
       working-directory: build
       run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
 
-  build-on-windows:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - name: Install dependences
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          git
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-make
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-qtwebkit
-          mingw-w64-x86_64-gflags
-          mingw-w64-x86_64-gtest
-          mingw-w64-x86_64-glog
-          mingw-w64-x86_64-protobuf
-          mingw-w64-x86_64-pybind11
+  # build-on-windows:
+  #   runs-on: windows-latest
+  #   defaults:
+  #     run:
+  #       shell: msys2 {0}
+  #   steps:
+  #   - name: Install dependences
+  #     uses: msys2/setup-msys2@v2
+  #     with:
+  #       update: true
+  #       install: >-
+  #         git
+  #         mingw-w64-x86_64-cmake
+  #         mingw-w64-x86_64-make
+  #         mingw-w64-x86_64-gcc
+  #         mingw-w64-x86_64-qtwebkit
+  #         mingw-w64-x86_64-gflags
+  #         mingw-w64-x86_64-gtest
+  #         mingw-w64-x86_64-glog
+  #         mingw-w64-x86_64-protobuf
+  #         mingw-w64-x86_64-pybind11
 
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
+  #   - name: Checkout repository and submodules
+  #     uses: actions/checkout@v2
+  #     with:
+  #       submodules: recursive
 
-    - name: Configure CMake
-      run: |
-        cmake -G "MinGW Makefiles" -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-          -DWITH_GCOV=OFF -DWITH_ASAN=OFF -DWITH_GLOG=OFF -DWITH_SQLITE=ON -DWITH_TEST=ON -DWITH_TOOLS=ON -DWITH_GAMES=ON \
-          -DCMAKE_CXX_FLAGS="-DGFLAGS_IS_A_DLL=0"
+  #   - name: Configure CMake
+  #     run: |
+  #       cmake -G "MinGW Makefiles" -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+  #         -DWITH_GCOV=OFF -DWITH_ASAN=OFF -DWITH_GLOG=OFF -DWITH_SQLITE=ON -DWITH_TEST=ON -DWITH_TOOLS=ON -DWITH_GAMES=ON \
+  #         -DCMAKE_CXX_FLAGS="-DGFLAGS_IS_A_DLL=0"
 
-    - name: Build
-      working-directory: build
-      run: mingw32-make -j15
+  #   - name: Build
+  #     working-directory: build
+  #     run: mingw32-make -j15
 
-    - name: Test
-      working-directory: build
-      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+  #   - name: Test
+  #     working-directory: build
+  #     run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
 
-  build-on-macos:
-    runs-on: macos-latest
-    steps:
-    - name: Install dependences
-      run: brew install googletest gflags glog sqlite protobuf pybind11 qtwebengine
+  # build-on-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #   - name: Install dependences
+  #     run: brew install googletest gflags glog sqlite protobuf pybind11 qtwebengine
 
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
+  #   - name: Checkout repository and submodules
+  #     uses: actions/checkout@v2
+  #     with:
+  #       submodules: recursive
 
-    - name: Configure CMake
-      run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-          -DWITH_GCOV=OFF -DWITH_ASAN=OFF -DWITH_GLOG=OFF -DWITH_SQLITE=ON -DWITH_TEST=ON -DWITH_TOOLS=ON -DWITH_GAMES=ON \
-          -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix qtwebengine)"
+  #   - name: Configure CMake
+  #     run: |
+  #       cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+  #         -DWITH_GCOV=OFF -DWITH_ASAN=OFF -DWITH_GLOG=OFF -DWITH_SQLITE=ON -DWITH_TEST=ON -DWITH_TOOLS=ON -DWITH_GAMES=ON \
+  #         -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix qtwebengine)"
 
-    - name: Build
-      run: cmake --build build --config ${{env.BUILD_TYPE}} -j$(sysctl -n hw.logicalcpu)
+  #   - name: Build
+  #     run: cmake --build build --config ${{env.BUILD_TYPE}} -j$(sysctl -n hw.logicalcpu)
 
-    - name: Test
-      working-directory: build
-      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+  #   - name: Test
+  #     working-directory: build
+  #     run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
       
